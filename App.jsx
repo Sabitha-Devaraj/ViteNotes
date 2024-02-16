@@ -69,6 +69,7 @@ export default function App() {
     async function updateNote(text) {
         const docRef = doc(db, "notes", currentNoteId)
         await setDoc(docRef, {body : text, updatedAt : Date.now()}, {merge: true})
+        //We no longer need this way of updating notes to set to local storage
         // setNotes(oldNotes => {
         //     const newArray = []
         //     for (let i = 0; i < oldNotes.length; i++) {

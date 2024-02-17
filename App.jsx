@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useEffect } from "react"
 import Sidebar from "./components/Sidebar"
 import Editor from "./components/Editor"
 import Split from "react-split"
@@ -15,6 +15,8 @@ import { notesCollection, db} from "./firebase"
 
 //Collection is a container for documents. For example, you can have users collection with each user as a different doc.
 
+//Debouncing - Delay the request (sent to FireStore) for specified amount of time (eg. 500ms). Currently, this program makes a call to db on every keystoke. Firebase limits the amount of request per day to 50,000 writes and 20,000 reads.
+
 export default function App() {
     const [notes, setNotes] = React.useState([])
         //() => JSON.parse(localStorage.getItem("notes")) || [])
@@ -26,6 +28,24 @@ export default function App() {
         || notes[0]
 
     const sortedNotes = notes.sort((a,b) => b.updatedAt - a.updatedAt)
+
+    const [tempNoteText,setTempNoteText] = React.useState("")
+
+    React.useEffect(()=>{
+        if(currentNote){
+            setTempNoteText(currentNote.body)
+        }
+    },[currentNote])
+
+    React.useEffect(()=> {
+        const timeoutId = setTimeout(()=>{
+            if(tempNoteText !== currentNote.body){
+                updateNote(tempNoteText)
+            }
+            
+        },500)
+        return () => clearTimeout(timeoutId)
+    },[tempNoteText])
 
 // ** We are no longer using localStorage to store and retrieve data/notes. **//
     // React.useEffect(() => {
@@ -116,8 +136,8 @@ export default function App() {
                             // currentNoteId &&
                             // notes.length > 0 &&
                             <Editor
-                                currentNote={currentNote}
-                                updateNote={updateNote}
+                                tempNoteText={tempNoteText}
+                                setTempNoteText={setTempNoteText}
                             />
                         }
                     </Split>
